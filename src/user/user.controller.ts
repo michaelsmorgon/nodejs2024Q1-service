@@ -5,10 +5,10 @@ import {
   Body,
   Param,
   Delete,
+  Put,
   HttpCode,
   UseInterceptors,
   ClassSerializerInterceptor,
-  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,18 +23,17 @@ export class UserController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return new User(this.userService.create(createUserDto));
+    return this.userService.create(createUserDto);
   }
 
   @Get()
   findAll(): User[] {
-    const users = this.userService.findAll();
-    return users.map((user) => new User(user));
+    return this.userService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id', IdValidationPipe) id: string): User {
-    return new User(this.userService.findOne(id));
+    return this.userService.findOne(id);
   }
 
   @Put(':id')
@@ -42,7 +41,7 @@ export class UserController {
     @Param('id', IdValidationPipe) id: string,
     @Body() updatePassDto: UpdatePasswordDto,
   ): User {
-    return new User(this.userService.update(id, updatePassDto));
+    return this.userService.update(id, updatePassDto);
   }
 
   @Delete(':id')

@@ -5,55 +5,52 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { IUser } from './interfaces/user.interface';
-import { v4 } from 'uuid';
 import { ErrorMessages } from 'src/utils/errors';
 import { User } from './entities/user.entity';
+import { generateId } from 'src/utils/id-generator';
 
 @Injectable()
 export class UserService {
-  private users: IUser[] = [];
+  private users: User[] = [];
 
   create(createUserDto: CreateUserDto): User {
-    const id = v4();
+    const id = generateId();
     const creationTime = this.getTimestamp();
     const version = 1;
-    const user: IUser = {
+    const user = new User({
       id,
       login: createUserDto.login,
       password: createUserDto.password,
       version,
       createdAt: creationTime,
       updatedAt: creationTime,
-    };
+    });
     this.users.push(user);
     return user;
   }
 
-  findAll(): IUser[] {
+  findAll(): User[] {
     return [...this.users];
   }
 
-  findOne(id: string): IUser {
+  findOne(id: string): User {
     return this.getUserById(id);
   }
 
-  update(id: string, updatePassDto: UpdatePasswordDto): IUser {
+  update(id: string, updatePassDto: UpdatePasswordDto): User {
     const index = this.getUserIndexById(id);
     const oldUser = this.getUserById(id);
     if (oldUser.password !== updatePassDto.oldPassword) {
       throw new ForbiddenException(ErrorMessages.INVALID_DATA);
     }
-    const newUser: IUser = {
+    const newUser = new User({
       ...oldUser,
       password: updatePassDto.newPassword,
       version: oldUser.version + 1,
       updatedAt: this.getTimestamp(),
-    };
+    });
     this.users.splice(index, 1, newUser);
-    const response = { ...newUser };
-    delete response.password;
-    return response;
+    return newUser;
   }
 
   remove(id: string): void {
@@ -61,7 +58,7 @@ export class UserService {
     this.users.splice(index, 1);
   }
 
-  private getUserById(id: string): IUser {
+  private getUserById(id: string): User {
     const index = this.getUserIndexById(id);
     return this.users[index];
   }
