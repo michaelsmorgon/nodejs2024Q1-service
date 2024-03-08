@@ -10,7 +10,6 @@ export class TrackService {
   private tracks: Track[] = [];
 
   create(createTrackDto: CreateTrackDto): Track {
-    console.log(createTrackDto);
     const id = generateId();
     const track = new Track({
       ...createTrackDto,
@@ -42,18 +41,6 @@ export class TrackService {
   remove(id: string) {
     const index = this.getTrackIndexById(id);
     this.tracks.splice(index, 1);
-  }
-
-  public removeArtistId(artistId: string) {
-    this.tracks = this.tracks.map((track) => {
-      if (track.artistId === artistId) {
-        return {
-          ...track,
-          artistId: null,
-        };
-      }
-      return track;
-    });
   }
 
   private getTrackById(id: string): Track {
