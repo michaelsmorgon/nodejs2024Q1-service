@@ -55,4 +55,28 @@ export class TrackService {
     }
     return index;
   }
+
+  public setArtistIdToNull(artistId: string): void {
+    this.tracks = this.tracks.map((track) => {
+      if (track.artistId === artistId) {
+        return {
+          ...track,
+          artistId: null,
+        };
+      }
+      return track;
+    });
+  }
+
+  public setAlbumIdToNull(albumId: string): void {
+    this.tracks = this.tracks.map((track) => {
+      if (track.albumId === albumId) {
+        return {
+          ...track,
+          albumId: null,
+        };
+      }
+      return track;
+    });
+  }
 }

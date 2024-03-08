@@ -4,9 +4,11 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { generateId } from 'src/utils/id-generator';
 import { ErrorMessages } from 'src/utils/errors';
+import { TrackService } from 'src/track/track.service';
 
 @Injectable()
 export class AlbumService {
+  constructor(private readonly trackService: TrackService) {}
   private albums: Album[] = [];
 
   create(createAlbumDto: CreateAlbumDto): Album {
@@ -41,6 +43,7 @@ export class AlbumService {
   remove(id: string) {
     const index = this.getAlbumIndexById(id);
     this.albums.splice(index, 1);
+    this.trackService.setAlbumIdToNull(id);
   }
 
   private getAlbumById(id: string): Album {
@@ -54,5 +57,17 @@ export class AlbumService {
       throw new NotFoundException(ErrorMessages.NOT_FOUND);
     }
     return index;
+  }
+
+  public setArtistIdToNull(artistId: string): void {
+    this.albums = this.albums.map((album) => {
+      if (album.artistId === artistId) {
+        return {
+          ...album,
+          artistId: null,
+        };
+      }
+      return album;
+    });
   }
 }
