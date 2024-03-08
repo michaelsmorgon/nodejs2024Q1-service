@@ -79,4 +79,11 @@ export class TrackService {
       return track;
     });
   }
+
+  public getTracks(ids?: string[]): Track[] {
+    if (ids) {
+      return this.tracks.filter((track) => ids.includes(track.id));
+    }
+    return this.tracks;
+  }
 }

@@ -64,4 +64,11 @@ export class ArtistService {
     }
     return index;
   }
+
+  public getArtists(ids?: string[]): Artist[] {
+    if (ids) {
+      return this.artists.filter((artist) => ids.includes(artist.id));
+    }
+    return this.artists;
+  }
 }

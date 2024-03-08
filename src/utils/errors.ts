@@ -5,4 +5,5 @@ export enum ErrorMessages {
   INVALID_DATA = 'Invalid data',
   INVALID_ID = 'Invalid id (is not UUID format)',
   NOT_FOUND = 'Given Id not found.',
+  NOT_EXIST = 'Such id does not exist',
 }

@@ -70,4 +70,11 @@ export class AlbumService {
       return album;
     });
   }
+
+  public getAlbums(ids?: string[]): Album[] {
+    if (ids) {
+      return this.albums.filter((album) => ids.includes(album.id));
+    }
+    return this.albums;
+  }
 }
