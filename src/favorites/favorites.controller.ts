@@ -8,19 +8,16 @@ export class FavoritesController {
 
   @Post('/track/:id')
   addTrack(@Param('id', IdValidationPipe) id: string) {
-    console.log('track', id);
     return this.favoritesService.addTrack(id);
   }
 
   @Post('/album/:id')
   addAlbum(@Param('id', IdValidationPipe) id: string) {
-    console.log('album', id);
     return this.favoritesService.addAlbum(id);
   }
 
   @Post('/artist/:id')
   addArtist(@Param('id', IdValidationPipe) id: string) {
-    console.log('artist', id);
     return this.favoritesService.addArtist(id);
   }
 
