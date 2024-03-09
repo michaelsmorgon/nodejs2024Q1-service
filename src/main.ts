@@ -13,7 +13,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   await app.listen(parseInt(process.env.PORT, 10) || 4000);
 }
 bootstrap();
