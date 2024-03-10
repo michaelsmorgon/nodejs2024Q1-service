@@ -769,7 +769,7 @@ paths:
         201:
           description: Added successfully
         400:
-          description: Bad. trackId is invalid (not uuid)
+          description: Bad request. trackId is invalid (not uuid)
         401:
           $ref: '#/components/responses/UnauthorizedError'
         422:
@@ -783,7 +783,7 @@ paths:
         204:
           description: Deleted successfully
         400:
-          description: Bad. trackId is invalid (not uuid)
+          description: Bad request. trackId is invalid (not uuid)
         401:
           $ref: '#/components/responses/UnauthorizedError'
         404:
@@ -805,7 +805,7 @@ paths:
         201:
           description: Added successfully
         400:
-          description: Bad. albumId is invalid (not uuid)
+          description: Bad request. albumId is invalid (not uuid)
         401:
           $ref: '#/components/responses/UnauthorizedError'
         422:
@@ -819,7 +819,7 @@ paths:
         204:
           description: Deleted successfully
         400:
-          description: Bad. albumId is invalid (not uuid)
+          description: Bad request. albumId is invalid (not uuid)
         401:
           $ref: '#/components/responses/UnauthorizedError'
         404:
