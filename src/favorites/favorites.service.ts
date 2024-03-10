@@ -10,7 +10,7 @@ import { ArtistService } from 'src/artist/artist.service';
 import { Artist } from 'src/artist/entities/artist.entity';
 import { Album } from 'src/album/entities/album.entity';
 import { Track } from 'src/track/entities/track.entity';
-import { ErrorMessages } from 'src/utils/errors';
+import { EntityName, getNotExistMsg, getNotFoundMsg } from 'src/utils/errors';
 
 export interface IFavorite {
   artists: Artist[];
@@ -34,7 +34,7 @@ export class FavoritesService {
   addTrack(id: string) {
     const tracks = this.trackService.getTracks();
     if (tracks.findIndex((track) => track.id === id) === -1) {
-      throw new UnprocessableEntityException(ErrorMessages.NOT_EXIST);
+      throw new UnprocessableEntityException(getNotExistMsg(EntityName.TRACK));
     }
     const favTracks = this.favorite.tracks;
     if (!favTracks.find((value) => value === id)) {
@@ -50,7 +50,7 @@ export class FavoritesService {
   addAlbum(id: string) {
     const albums = this.albumService.getAlbums();
     if (albums.findIndex((album) => album.id === id) === -1) {
-      throw new UnprocessableEntityException(ErrorMessages.NOT_EXIST);
+      throw new UnprocessableEntityException(getNotExistMsg(EntityName.ALBUM));
     }
     const favAlbums = this.favorite.albums;
     if (!favAlbums.find((value) => value === id)) {
@@ -66,7 +66,7 @@ export class FavoritesService {
   addArtist(id: string) {
     const artists = this.artistService.getArtists();
     if (artists.findIndex((artist) => artist.id === id) === -1) {
-      throw new UnprocessableEntityException(ErrorMessages.NOT_EXIST);
+      throw new UnprocessableEntityException(getNotExistMsg(EntityName.ARTIST));
     }
     const favArtists = this.favorite.artists;
     if (!favArtists.find((value) => value === id)) {
@@ -94,7 +94,7 @@ export class FavoritesService {
 
   removeTrack(id: string) {
     const favTracks = this.favorite.tracks;
-    const index = this.getIndexById(id, favTracks);
+    const index = this.getIndexById(id, favTracks, EntityName.TRACK);
     favTracks.splice(index, 1);
 
     this.favorite = {
@@ -105,7 +105,7 @@ export class FavoritesService {
 
   removeAlbum(id: string) {
     const favAlbums = this.favorite.albums;
-    const index = this.getIndexById(id, favAlbums);
+    const index = this.getIndexById(id, favAlbums, EntityName.ALBUM);
     favAlbums.splice(index, 1);
 
     this.favorite = {
@@ -116,7 +116,7 @@ export class FavoritesService {
 
   removeArtist(id: string) {
     const favArtists = this.favorite.artists;
-    const index = this.getIndexById(id, favArtists);
+    const index = this.getIndexById(id, favArtists, EntityName.ARTIST);
     favArtists.splice(index, 1);
 
     this.favorite = {
@@ -125,10 +125,10 @@ export class FavoritesService {
     };
   }
 
-  private getIndexById(id: string, list: string[]): number {
+  private getIndexById(id: string, list: string[], entityName: string): number {
     const index = list.findIndex((value) => value === id);
     if (index === -1) {
-      throw new NotFoundException(ErrorMessages.NOT_FOUND);
+      throw new NotFoundException(getNotFoundMsg(entityName));
     }
     return index;
   }

@@ -7,11 +7,11 @@ import {
   Delete,
   Put,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { IdValidationPipe } from 'src/pipes/id-validation-pipe';
 
 @Controller('album')
 export class AlbumController {
@@ -28,13 +28,13 @@ export class AlbumController {
   }
 
   @Get(':id')
-  findOne(@Param('id', IdValidationPipe) id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.albumService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
   ) {
     return this.albumService.update(id, updateAlbumDto);
@@ -42,7 +42,7 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', IdValidationPipe) id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.albumService.remove(id);
   }
 }

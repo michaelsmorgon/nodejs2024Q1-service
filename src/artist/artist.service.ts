@@ -3,7 +3,7 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import { generateId } from 'src/utils/id-generator';
-import { ErrorMessages } from 'src/utils/errors';
+import { EntityName, getNotFoundMsg } from 'src/utils/errors';
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from 'src/album/album.service';
 
@@ -60,7 +60,7 @@ export class ArtistService {
   private getArtistIndexById(id: string): number {
     const index = this.artists.findIndex((artist) => artist.id === id);
     if (index === -1) {
-      throw new NotFoundException(ErrorMessages.NOT_FOUND);
+      throw new NotFoundException(getNotFoundMsg(EntityName.ARTIST));
     }
     return index;
   }

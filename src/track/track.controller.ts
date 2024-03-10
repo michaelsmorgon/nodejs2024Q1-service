@@ -7,11 +7,11 @@ import {
   Delete,
   Put,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { IdValidationPipe } from 'src/pipes/id-validation-pipe';
 
 @Controller('track')
 export class TrackController {
@@ -28,13 +28,13 @@ export class TrackController {
   }
 
   @Get(':id')
-  findOne(@Param('id', IdValidationPipe) id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.trackService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
   ) {
     return this.trackService.update(id, updateTrackDto);
@@ -42,7 +42,7 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', IdValidationPipe) id: string) {
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.trackService.remove(id);
   }
 }

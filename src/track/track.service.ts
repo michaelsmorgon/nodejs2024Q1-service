@@ -3,7 +3,7 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import { generateId } from 'src/utils/id-generator';
-import { ErrorMessages } from 'src/utils/errors';
+import { EntityName, getNotFoundMsg } from 'src/utils/errors';
 
 @Injectable()
 export class TrackService {
@@ -51,7 +51,7 @@ export class TrackService {
   private getTrackIndexById(id: string): number {
     const index = this.tracks.findIndex((track) => track.id === id);
     if (index === -1) {
-      throw new NotFoundException(ErrorMessages.NOT_FOUND);
+      throw new NotFoundException(getNotFoundMsg(EntityName.TRACK));
     }
     return index;
   }

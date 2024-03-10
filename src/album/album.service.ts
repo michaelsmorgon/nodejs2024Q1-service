@@ -3,13 +3,14 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { generateId } from 'src/utils/id-generator';
-import { ErrorMessages } from 'src/utils/errors';
+import { getNotFoundMsg } from 'src/utils/errors';
 import { TrackService } from 'src/track/track.service';
 
 @Injectable()
 export class AlbumService {
   constructor(private readonly trackService: TrackService) {}
   private albums: Album[] = [];
+  private entityName = 'Album';
 
   create(createAlbumDto: CreateAlbumDto): Album {
     const id = generateId();
@@ -54,7 +55,7 @@ export class AlbumService {
   private getAlbumIndexById(id: string): number {
     const index = this.albums.findIndex((track) => track.id === id);
     if (index === -1) {
-      throw new NotFoundException(ErrorMessages.NOT_FOUND);
+      throw new NotFoundException(getNotFoundMsg(this.entityName));
     }
     return index;
   }

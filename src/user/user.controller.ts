@@ -9,11 +9,11 @@ import {
   HttpCode,
   UseInterceptors,
   ClassSerializerInterceptor,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { IdValidationPipe } from 'src/pipes/id-validation-pipe';
 import { User } from './entities/user.entity';
 
 @Controller('user')
@@ -32,13 +32,13 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id', IdValidationPipe) id: string): User {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string): User {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updatePassDto: UpdatePasswordDto,
   ): User {
     return this.userService.update(id, updatePassDto);
@@ -46,7 +46,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', IdValidationPipe) id: string): void {
+  remove(@Param('id', new ParseUUIDPipe()) id: string): void {
     return this.userService.remove(id);
   }
 }

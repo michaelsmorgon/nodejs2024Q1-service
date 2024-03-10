@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ErrorMessages } from 'src/utils/errors';
+import {
+  EntityName,
+  getNotFoundMsg,
+  getOldPassWrongMsg,
+} from 'src/utils/errors';
 import { User } from './entities/user.entity';
 import { generateId } from 'src/utils/id-generator';
 
@@ -41,7 +45,7 @@ export class UserService {
     const index = this.getUserIndexById(id);
     const oldUser = this.getUserById(id);
     if (oldUser.password !== updatePassDto.oldPassword) {
-      throw new ForbiddenException(ErrorMessages.INVALID_DATA);
+      throw new ForbiddenException(getOldPassWrongMsg());
     }
     const newUser = new User({
       ...oldUser,
@@ -66,7 +70,7 @@ export class UserService {
   private getUserIndexById(id: string): number {
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
-      throw new NotFoundException(ErrorMessages.NOT_FOUND);
+      throw new NotFoundException(getNotFoundMsg(EntityName.USER));
     }
     return index;
   }

@@ -1,9 +1,29 @@
-export enum ErrorMessages {
-  INVALID_METHOD = 'Invalid Method',
-  INVALID_URL = 'Invalid URL',
-  INTERNAL_ERROR = 'Internal server error',
-  INVALID_DATA = 'Invalid data',
-  INVALID_ID = 'Invalid id (is not UUID format)',
-  NOT_FOUND = 'Given Id not found.',
-  NOT_EXIST = 'Such id does not exist',
+export enum EntityName {
+  USER = 'User',
+  ALBUM = 'Album',
+  ARTIST = 'Artist',
+  TRACK = 'Track',
 }
+
+export enum EntityIdName {
+  USER_ID = 'userId',
+  ALBUM_ID = 'albumId',
+  ARTIST_ID = 'artistId',
+  TRACK_ID = 'trackId',
+}
+
+export const getNotFoundMsg = (entityName: string): string => {
+  return `${entityName} was not found`;
+};
+
+export const getInvalidIdMsg = (entityId: string): string => {
+  return `Bad request. ${entityId} is invalid (not uuid)`;
+};
+
+export const getNotExistMsg = (entityName: string): string => {
+  return `${entityName} with id doesn't exist`;
+};
+
+export const getOldPassWrongMsg = (): string => {
+  return `oldPassword is wrong`;
+};
