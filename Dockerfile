@@ -1,8 +1,19 @@
-FROM node:alpine3.19
+FROM node:alpine3.19 as builder
+
 WORKDIR /app
-COPY package*.json ./
+
+COPY package*.json .
+
+COPY prisma ./prisma/
+
+RUN npm cache clean --force
+
 RUN npm ci
-COPY . /app/
+
+FROM node:alpine3.19
+
+WORKDIR /app
+
 EXPOSE ${PORT}
-VOLUME ["/app"]
-CMD ["npm", "run", "start:dev"]
+
+CMD npx prisma generate && npx prisma migrate deploy && npm run start:dev
