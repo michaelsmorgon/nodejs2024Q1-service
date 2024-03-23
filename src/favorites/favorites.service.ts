@@ -63,16 +63,10 @@ export class FavoritesService {
 
   async addArtist(id: string) {
     const artist = await this.artistService.findOne(id);
-    console.log('-----1-----');
-    console.log(artist);
-    console.log('-----1-----');
     if (!artist) {
       throw new UnprocessableEntityException(getNotExistMsg(EntityName.ARTIST));
     }
     const favsId = this.favoriteId;
-    console.log('-----1-----');
-    console.log(favsId);
-    console.log('-----1-----');
     const res = await this.dbService.artist.update({
       where: { id },
       data: {
@@ -82,9 +76,6 @@ export class FavoritesService {
         },
       },
     });
-    console.log('-----1-----');
-    console.log(res);
-    console.log('-----1-----');
   }
 
   async findAll(): Promise<IFavorite> {
@@ -120,7 +111,6 @@ export class FavoritesService {
         },
       },
     });
-    console.log(res);
     return {
       albums: res?.albums ? res.albums : [],
       artists: res?.artist ? res.artist : [],
