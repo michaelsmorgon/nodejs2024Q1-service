@@ -1,81 +1,90 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { generateId } from 'src/utils/id-generator';
-import { getNotFoundMsg } from 'src/utils/errors';
+import {
+  EntityName,
+  getNotFoundMsg,
+  getOldPassWrongMsg,
+} from 'src/utils/errors';
 import { TrackService } from 'src/track/track.service';
+import { DBService } from 'src/db/db.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly trackService: TrackService) {}
-  private albums: Album[] = [];
-  private entityName = 'Album';
+  constructor(
+    private readonly trackService: TrackService,
+    private readonly dbService: DBService,
+  ) {}
 
-  create(createAlbumDto: CreateAlbumDto): Album {
-    const id = generateId();
-    const album = new Album({
-      ...createAlbumDto,
-      id,
+  async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
+    const result = await this.dbService.album.create({
+      data: { ...createAlbumDto },
     });
-    this.albums.push(album);
-    return album;
+    return result;
   }
 
-  findAll(): Album[] {
-    return [...this.albums];
+  async findAll(): Promise<Album[]> {
+    return await this.dbService.album.findMany();
   }
 
-  findOne(id: string): Album {
-    return this.getAlbumById(id);
+  public async getAlbums(ids?: string[]): Promise<Album[]> {
+    if (ids) {
+      return await this.dbService.album.findMany({
+        where: {
+          id: { in: ids },
+        },
+      });
+    }
+
+    return this.findAll();
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    const index = this.getAlbumIndexById(id);
-    const oldAlbum = this.getAlbumById(id);
-    const newAlbum = new Album({
-      ...oldAlbum,
-      ...updateAlbumDto,
+  async findOne(id: string): Promise<Album> {
+    return await this.dbService.album.findUnique({
+      where: { id },
     });
-    this.albums.splice(index, 1, newAlbum);
-    return newAlbum;
   }
 
-  remove(id: string) {
-    const index = this.getAlbumIndexById(id);
-    this.albums.splice(index, 1);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<Album> {
+    let result = await this.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.ALBUM));
+    }
+    try {
+      result = await this.dbService.album.update({
+        where: { id },
+        data: {
+          ...updateAlbumDto,
+        },
+      });
+      return result;
+    } catch {
+      throw new ForbiddenException(getOldPassWrongMsg());
+    }
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.ALBUM));
+    }
+    await this.dbService.album.delete({
+      where: { id },
+    });
     this.trackService.setAlbumIdToNull(id);
   }
 
-  private getAlbumById(id: string): Album {
-    const index = this.getAlbumIndexById(id);
-    return this.albums[index];
-  }
-
-  private getAlbumIndexById(id: string): number {
-    const index = this.albums.findIndex((track) => track.id === id);
-    if (index === -1) {
-      throw new NotFoundException(getNotFoundMsg(this.entityName));
-    }
-    return index;
-  }
-
-  public setArtistIdToNull(artistId: string): void {
-    this.albums = this.albums.map((album) => {
-      if (album.artistId === artistId) {
-        return {
-          ...album,
-          artistId: null,
-        };
-      }
-      return album;
+  public async setArtistIdToNull(artistId: string): Promise<void> {
+    await this.dbService.album.updateMany({
+      where: { artistId },
+      data: {
+        artistId: null,
+      },
     });
-  }
-
-  public getAlbums(ids?: string[]): Album[] {
-    if (ids) {
-      return this.albums.filter((album) => ids.includes(album.id));
-    }
-    return this.albums;
   }
 }
