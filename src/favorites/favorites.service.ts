@@ -67,7 +67,7 @@ export class FavoritesService {
       throw new UnprocessableEntityException(getNotExistMsg(EntityName.ARTIST));
     }
     const favsId = this.favoriteId;
-    const res = await this.dbService.artist.update({
+    await this.dbService.artist.update({
       where: { id },
       data: {
         ...artist,
