@@ -1,89 +1,94 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
-import { generateId } from 'src/utils/id-generator';
-import { EntityName, getNotFoundMsg } from 'src/utils/errors';
+import {
+  EntityName,
+  getNotFoundMsg,
+  getOldPassWrongMsg,
+} from 'src/utils/errors';
+import { DBService } from 'src/db/db.service';
 
 @Injectable()
 export class TrackService {
-  private tracks: Track[] = [];
+  constructor(private readonly dbService: DBService) {}
 
-  create(createTrackDto: CreateTrackDto): Track {
-    const id = generateId();
-    const track = new Track({
-      ...createTrackDto,
-      id,
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
+    const result = await this.dbService.track.create({
+      data: { ...createTrackDto },
     });
-    this.tracks.push(track);
-    return track;
+    return result;
   }
 
-  findAll(): Track[] {
-    return [...this.tracks];
+  async findAll(): Promise<Track[]> {
+    return await this.dbService.track.findMany();
   }
 
-  findOne(id: string): Track {
-    return this.getTrackById(id);
+  public async getTracks(ids?: string[]): Promise<Track[]> {
+    if (ids) {
+      return await this.dbService.track.findMany({
+        where: {
+          id: { in: ids },
+        },
+      });
+    }
+
+    return this.findAll();
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const index = this.getTrackIndexById(id);
-    const oldTrack = this.getTrackById(id);
-    const newTrack = new Track({
-      ...oldTrack,
-      ...updateTrackDto,
+  public async findOne(id: string): Promise<Track> {
+    return await this.dbService.track.findUnique({
+      where: { id },
     });
-    this.tracks.splice(index, 1, newTrack);
-    return newTrack;
   }
 
-  remove(id: string) {
-    const index = this.getTrackIndexById(id);
-    this.tracks.splice(index, 1);
-  }
-
-  private getTrackById(id: string): Track {
-    const index = this.getTrackIndexById(id);
-    return this.tracks[index];
-  }
-
-  private getTrackIndexById(id: string): number {
-    const index = this.tracks.findIndex((track) => track.id === id);
-    if (index === -1) {
+  async update(id: string, updateTrackDto: UpdateTrackDto): Promise<Track> {
+    let result = await this.findOne(id);
+    if (!result) {
       throw new NotFoundException(getNotFoundMsg(EntityName.TRACK));
     }
-    return index;
-  }
-
-  public setArtistIdToNull(artistId: string): void {
-    this.tracks = this.tracks.map((track) => {
-      if (track.artistId === artistId) {
-        return {
-          ...track,
-          artistId: null,
-        };
-      }
-      return track;
-    });
-  }
-
-  public setAlbumIdToNull(albumId: string): void {
-    this.tracks = this.tracks.map((track) => {
-      if (track.albumId === albumId) {
-        return {
-          ...track,
-          albumId: null,
-        };
-      }
-      return track;
-    });
-  }
-
-  public getTracks(ids?: string[]): Track[] {
-    if (ids) {
-      return this.tracks.filter((track) => ids.includes(track.id));
+    try {
+      result = await this.dbService.track.update({
+        where: { id },
+        data: {
+          ...updateTrackDto,
+        },
+      });
+      return result;
+    } catch {
+      throw new ForbiddenException(getOldPassWrongMsg());
     }
-    return this.tracks;
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.TRACK));
+    }
+    await this.dbService.track.delete({
+      where: { id },
+    });
+  }
+
+  public async setArtistIdToNull(artistId: string): Promise<void> {
+    await this.dbService.track.updateMany({
+      where: { artistId },
+      data: {
+        artistId: null,
+      },
+    });
+  }
+
+  public async setAlbumIdToNull(albumId: string): Promise<void> {
+    await this.dbService.track.updateMany({
+      where: { albumId },
+      data: {
+        albumId: null,
+      },
+    });
   }
 }
