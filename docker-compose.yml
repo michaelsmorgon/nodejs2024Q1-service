@@ -12,7 +12,7 @@ services:
     networks:
       - network_bridge
     ports:
-      - 4000:${PORT}
+      - ${PORT}:4000
     depends_on:
       - postgres
     env_file:
@@ -30,7 +30,7 @@ services:
     networks:
       - network_bridge
     ports:
-      - 5432:${POSTGRES_PORT}
+      - ${POSTGRES_PORT}:5432
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
