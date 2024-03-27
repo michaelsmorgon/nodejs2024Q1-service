@@ -1,74 +1,84 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
-import { generateId } from 'src/utils/id-generator';
-import { EntityName, getNotFoundMsg } from 'src/utils/errors';
+import {
+  EntityName,
+  getNotFoundMsg,
+  getOldPassWrongMsg,
+} from 'src/utils/errors';
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from 'src/album/album.service';
+import { DBService } from 'src/db/db.service';
 
 @Injectable()
 export class ArtistService {
   constructor(
     private readonly trackService: TrackService,
     private readonly albumService: AlbumService,
+    private readonly dbService: DBService,
   ) {}
-  private artists: Artist[] = [];
 
-  create(createArtistDto: CreateArtistDto): Artist {
-    const id = generateId();
-    const artist = new Artist({
-      ...createArtistDto,
-      id,
+  async create(createArtistDto: CreateArtistDto): Promise<Artist> {
+    const result = await this.dbService.artist.create({
+      data: { ...createArtistDto },
     });
-    this.artists.push(artist);
-    return artist;
+    return result;
   }
 
-  findAll(): Artist[] {
-    return [...this.artists];
+  async findAll(): Promise<Artist[]> {
+    return await this.dbService.artist.findMany();
   }
 
-  findOne(id: string): Artist {
-    return this.getArtistById(id);
+  public async getArtists(ids?: string[]): Promise<Artist[]> {
+    if (ids) {
+      return await this.dbService.artist.findMany({
+        where: {
+          id: { in: ids },
+        },
+      });
+    }
+
+    return this.findAll();
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const index = this.getArtistIndexById(id);
-    const oldArtist = this.getArtistById(id);
-    const newArtist = new Artist({
-      ...oldArtist,
-      grammy: updateArtistDto.grammy,
-      name: updateArtistDto.name,
+  async findOne(id: string): Promise<Artist> {
+    return await this.dbService.artist.findUnique({
+      where: { id },
     });
-    this.artists.splice(index, 1, newArtist);
-    return newArtist;
   }
 
-  remove(id: string) {
-    const index = this.getArtistIndexById(id);
-    this.artists.splice(index, 1);
-    this.trackService.setArtistIdToNull(id);
-    this.albumService.setArtistIdToNull(id);
-  }
-
-  private getArtistById(id: string): Artist {
-    const index = this.getArtistIndexById(id);
-    return this.artists[index];
-  }
-
-  private getArtistIndexById(id: string): number {
-    const index = this.artists.findIndex((artist) => artist.id === id);
-    if (index === -1) {
+  async update(id: string, updateArtistDto: UpdateArtistDto): Promise<Artist> {
+    let result = await this.findOne(id);
+    if (!result) {
       throw new NotFoundException(getNotFoundMsg(EntityName.ARTIST));
     }
-    return index;
+    try {
+      result = await this.dbService.artist.update({
+        where: { id },
+        data: {
+          ...updateArtistDto,
+        },
+      });
+      return result;
+    } catch {
+      throw new ForbiddenException(getOldPassWrongMsg());
+    }
   }
 
-  public getArtists(ids?: string[]): Artist[] {
-    if (ids) {
-      return this.artists.filter((artist) => ids.includes(artist.id));
+  async remove(id: string): Promise<void> {
+    const result = await this.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.ARTIST));
     }
-    return this.artists;
+    await this.dbService.artist.delete({
+      where: { id },
+    });
+    this.trackService.setArtistIdToNull(id);
+    this.albumService.setArtistIdToNull(id);
   }
 }

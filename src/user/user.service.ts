@@ -5,77 +5,88 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { DBService } from 'src/db/db.service';
 import {
   EntityName,
   getNotFoundMsg,
   getOldPassWrongMsg,
 } from 'src/utils/errors';
 import { User } from './entities/user.entity';
-import { generateId } from 'src/utils/id-generator';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  private select = {
+    id: true,
+    login: true,
+    version: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+  constructor(private readonly dbService: DBService) {}
 
-  create(createUserDto: CreateUserDto): User {
-    const id = generateId();
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const creationTime = this.getTimestamp();
-    const version = 1;
-    const user = new User({
-      id,
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version,
-      createdAt: creationTime,
-      updatedAt: creationTime,
+    const result = await this.dbService.user.create({
+      data: {
+        ...createUserDto,
+        createdAt: creationTime,
+        updatedAt: creationTime,
+      },
+      select: this.select,
     });
-    this.users.push(user);
-    return user;
+    return result;
   }
 
-  findAll(): User[] {
-    return [...this.users];
-  }
-
-  findOne(id: string): User {
-    return this.getUserById(id);
-  }
-
-  update(id: string, updatePassDto: UpdatePasswordDto): User {
-    const index = this.getUserIndexById(id);
-    const oldUser = this.getUserById(id);
-    if (oldUser.password !== updatePassDto.oldPassword) {
-      throw new ForbiddenException(getOldPassWrongMsg());
-    }
-    const newUser = new User({
-      ...oldUser,
-      password: updatePassDto.newPassword,
-      version: oldUser.version + 1,
-      updatedAt: this.getTimestamp(),
+  async findAll(): Promise<User[]> {
+    const result = await this.dbService.user.findMany({
+      select: this.select,
     });
-    this.users.splice(index, 1, newUser);
-    return newUser;
+    return result;
   }
 
-  remove(id: string): void {
-    const index = this.getUserIndexById(id);
-    this.users.splice(index, 1);
+  async findOne(id: string): Promise<User> {
+    const result = await this.dbService.user.findUnique({
+      where: { id },
+      select: this.select,
+    });
+    return result;
   }
 
-  private getUserById(id: string): User {
-    const index = this.getUserIndexById(id);
-    return this.users[index];
-  }
-
-  private getUserIndexById(id: string): number {
-    const index = this.users.findIndex((user) => user.id === id);
-    if (index === -1) {
+  async update(id: string, updatePassDto: UpdatePasswordDto): Promise<User> {
+    let result = await this.findOne(id);
+    if (!result) {
       throw new NotFoundException(getNotFoundMsg(EntityName.USER));
     }
-    return index;
+    try {
+      result = await this.dbService.user.update({
+        where: {
+          id,
+          password: updatePassDto.oldPassword,
+        },
+        data: {
+          version: { increment: 1 },
+          password: updatePassDto.newPassword,
+          updatedAt: this.getTimestamp(),
+        },
+        select: this.select,
+      });
+      return result;
+    } catch {
+      throw new ForbiddenException(getOldPassWrongMsg());
+    }
   }
 
-  private getTimestamp(): number {
-    return Date.now();
+  async remove(id: string): Promise<void> {
+    const result = await this.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.USER));
+    }
+    await this.dbService.user.delete({
+      where: { id },
+    });
+  }
+
+  private getTimestamp(): string {
+    return new Date().toISOString();
   }
 }

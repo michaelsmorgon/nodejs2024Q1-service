@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: ${SERVICE_APP}
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - PORT=${PORT}
+    networks:
+      - network_bridge
+    ports:
+      - ${PORT}:4000
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - nodemodules:/app/node_modules
+
+  postgres:
+    container_name: ${SERVICE_DB}
+    build:
+      context: .
+      dockerfile: ./postgres/Dockerfile
+    restart: always
+    networks:
+      - network_bridge
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+volumes:
+  nodemodules:
+
+networks:
+  network_bridge:
+    driver: bridge

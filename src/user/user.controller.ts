@@ -10,11 +10,12 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   ParseUUIDPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { EntityName, getNotFoundMsg } from 'src/utils/errors';
 
 @Controller('user')
 export class UserController {
@@ -22,31 +23,46 @@ export class UserController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const user = await this.userService.create(createUserDto);
+    return {
+      ...user,
+      createdAt: (user.createdAt as Date).getTime(),
+      updatedAt: (user.updatedAt as Date).getTime(),
+    };
   }
 
   @Get()
-  findAll(): User[] {
-    return this.userService.findAll();
+  async findAll() {
+    return await this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', new ParseUUIDPipe()) id: string): User {
-    return this.userService.findOne(id);
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    const result = await this.userService.findOne(id);
+    if (!result) {
+      throw new NotFoundException(getNotFoundMsg(EntityName.USER));
+    }
+    return result;
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updatePassDto: UpdatePasswordDto,
-  ): User {
-    return this.userService.update(id, updatePassDto);
+  ) {
+    const result = await this.userService.update(id, updatePassDto);
+
+    return {
+      ...result,
+      createdAt: (result.createdAt as Date).getTime(),
+      updatedAt: (result.updatedAt as Date).getTime(),
+    };
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string): void {
-    return this.userService.remove(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.userService.remove(id);
   }
 }
