@@ -8,6 +8,7 @@ import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { DBModule } from './db/db.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { DBModule } from './db/db.module';
     AlbumModule,
     FavoritesModule,
     DBModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

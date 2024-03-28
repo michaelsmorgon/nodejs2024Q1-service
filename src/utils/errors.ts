@@ -27,3 +27,15 @@ export const getNotExistMsg = (entityName: string): string => {
 export const getOldPassWrongMsg = (): string => {
   return `oldPassword is wrong`;
 };
+
+export const getNoUserMsg = (): string => {
+  return 'No user with such login and password';
+};
+
+export const getTokenReqMsg = (): string => {
+  return 'refreshToken should not be empty';
+};
+
+export const getInvalidTokenMsg = (): string => {
+  return 'Refresh token is invalid or expired';
+};

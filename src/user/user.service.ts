@@ -52,6 +52,13 @@ export class UserService {
     return result;
   }
 
+  async findByLogin(login: string): Promise<User> {
+    const result = await this.dbService.user.findFirst({
+      where: { login },
+    });
+    return result;
+  }
+
   async update(id: string, updatePassDto: UpdatePasswordDto): Promise<User> {
     let result = await this.findOne(id);
     if (!result) {
