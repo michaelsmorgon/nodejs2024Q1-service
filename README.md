@@ -10,7 +10,7 @@
 ```
 git clone https://github.com/michaelsmorgon/nodejs2024Q1-service.git
 
-git checkout dev-part2
+git checkout dev-part3
 ```
 
 ## Installing NPM modules
