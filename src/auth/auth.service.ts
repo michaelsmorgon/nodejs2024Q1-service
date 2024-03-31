@@ -23,7 +23,10 @@ export class AuthService {
   ) {}
 
   async signUp(login: string, password: string) {
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashPassword = await bcrypt.hash(
+      password,
+      parseInt(process.env.CRYPT_SALT, 10) || 10,
+    );
     return await this.userService.create({
       login,
       password: hashPassword,
