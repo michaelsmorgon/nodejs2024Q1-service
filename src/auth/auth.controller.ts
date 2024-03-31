@@ -21,6 +21,8 @@ export class AuthController {
     return this.authService.login(createUserDto.login, createUserDto.password);
   }
 
+  @Public()
+  @HttpCode(HttpStatus.OK)
   @Post('refresh')
   refresh(@Body() token: Token) {
     return this.authService.refresh(token.refreshToken);
