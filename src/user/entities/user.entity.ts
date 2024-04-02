@@ -1,14 +1,14 @@
 import { Exclude } from 'class-transformer';
 
 export class User {
-  id: string; // uuid v4
+  id: string;
   login: string;
 
   @Exclude()
-  password: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
+  password?: string;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

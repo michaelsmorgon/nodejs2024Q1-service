@@ -29,8 +29,8 @@ export class FavoritesController {
   }
 
   @Get()
-  findAll(): IFavorite {
-    return this.favoritesService.findAll();
+  async findAll(): Promise<IFavorite> {
+    return await this.favoritesService.findAll();
   }
 
   @Delete('/track/:id')

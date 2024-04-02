@@ -8,7 +8,9 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/michaelsmorgon/nodejs2024Q1-service.git
+
+git checkout dev-part3
 ```
 
 ## Installing NPM modules
@@ -26,12 +28,22 @@ rename .env.example to .env
 ## Running application
 
 ```
-npm start
+docker-compose up
 ```
 
+For stopping container use:
+```
+docker-compose down
+```
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Run vulnerabilities scanning
+```
+npm run docker:scout:app
+npm run docker:scout:db
+```
 
 ## Testing
 

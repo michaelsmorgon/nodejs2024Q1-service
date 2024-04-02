@@ -4,10 +4,11 @@ import { FavoritesController } from './favorites.controller';
 import { ArtistModule } from 'src/artist/artist.module';
 import { TrackModule } from 'src/track/track.module';
 import { AlbumModule } from 'src/album/album.module';
+import { DBModule } from 'src/db/db.module';
 
 @Module({
   controllers: [FavoritesController],
   providers: [FavoritesService],
-  imports: [ArtistModule, TrackModule, AlbumModule],
+  imports: [ArtistModule, TrackModule, AlbumModule, DBModule],
 })
 export class FavoritesModule {}
